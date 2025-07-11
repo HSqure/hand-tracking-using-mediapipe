@@ -22,9 +22,9 @@ class HandDetector():
         self.detectionCon = detectionCon
         self.trackCon = trackCon
 
-        self.mpHands = mp.solutions.hands
+        self.mpHands = mp.solutions.hands # type: ignore
         self.hands = self.mpHands.Hands(self.mode, self.maxHands, self.model_complexity, self.detectionCon, self.trackCon)
-        self.mpDraw = mp.solutions.drawing_utils
+        self.mpDraw = mp.solutions.drawing_utils # type: ignore
         self.tipIds = [4, 8, 12, 16, 20]
         self.lmList = []
         self.handedness = ""
@@ -107,8 +107,8 @@ def main():
     pTime = 0
     cap = cv2.VideoCapture(0)
     # 增加分辨率以提高精度
-    cap.set(3, 1280)
-    cap.set(4, 720)
+    # cap.set(3, 1280)
+    # cap.set(4, 720)
     detector = HandDetector(detectionCon=0.75, maxHands=1) # 为了简化，先只处理一只手
 
     while True:

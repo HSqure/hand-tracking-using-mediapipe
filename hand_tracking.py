@@ -23,9 +23,9 @@ if cap is None:
     print("3. 您有访问摄像头的权限")
     exit(1)
 
-mpHands = mp.solutions.hands
+mpHands = mp.solutions.hands # type: ignore
 hands = mpHands.Hands()
-mpDraw = mp.solutions.drawing_utils
+mpDraw = mp.solutions.drawing_utils # type: ignore
 
 pTime = 0
 cTime = 0
