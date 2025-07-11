@@ -25,6 +25,13 @@ class HandDetector():
         self.mpHands = mp.solutions.hands # type: ignore
         self.hands = self.mpHands.Hands(self.mode, self.maxHands, self.model_complexity, self.detectionCon, self.trackCon)
         self.mpDraw = mp.solutions.drawing_utils # type: ignore
+
+        # 马卡龙配色 (BGR)
+        macaron_pink = (203, 192, 255)
+        macaron_green = (192, 255, 192)
+        self.landmark_drawing_spec = self.mpDraw.DrawingSpec(color=macaron_pink, thickness=2, circle_radius=2)
+        self.connection_drawing_spec = self.mpDraw.DrawingSpec(color=macaron_green, thickness=2)
+        
         self.tipIds = [4, 8, 12, 16, 20]
         self.lmList = []
         self.handedness = ""
@@ -42,7 +49,9 @@ class HandDetector():
         if self.results.multi_hand_landmarks:
             for handLms in self.results.multi_hand_landmarks:
                 if draw:
-                    self.mpDraw.draw_landmarks(img, handLms, self.mpHands.HAND_CONNECTIONS)
+                    self.mpDraw.draw_landmarks(img, handLms, self.mpHands.HAND_CONNECTIONS,
+                                               self.landmark_drawing_spec,
+                                               self.connection_drawing_spec)
         return img
 
     def findPosition(self, img, handNo=0, draw=True):
@@ -68,7 +77,8 @@ class HandDetector():
                     cx, cy, cz = int(lm.x * w), int(lm.y * h), lm.z
                     self.lmList.append([id, cx, cy, cz])
                     if draw:
-                        cv2.circle(img, (cx, cy), 5, (255, 0, 255), cv2.FILLED)
+                        # 马卡龙粉色
+                        cv2.circle(img, (cx, cy), 5, (203, 192, 255), cv2.FILLED)
         return self.lmList
 
     def fingersUp(self):
@@ -111,6 +121,11 @@ def main():
     # cap.set(4, 720)
     detector = HandDetector(detectionCon=0.75, maxHands=1) # 为了简化，先只处理一只手
 
+    # 马卡龙配色 (BGR)
+    macaron_bg = (221, 255, 221)  # 背景框: 淡绿
+    macaron_text = (255, 204, 204) # 文字: 淡蓝
+    macaron_info = (221, 160, 221) # 信息: 淡紫
+
     while True:
         success, img = cap.read()
         if not success:
@@ -133,16 +148,40 @@ def main():
             # print(f"Wrist Z: {lmList[0][3]:.2f}, Index Tip Z: {lmList[8][3]:.2f}")
 
             # 4. 在屏幕上显示结果
-            cv2.rectangle(img, (20, 20), (120, 120), (0, 255, 0), cv2.FILLED)
+            cv2.rectangle(img, (20, 20), (120, 120), macaron_bg, cv2.FILLED)
             cv2.putText(img, str(totalFingers), (45, 100), cv2.FONT_HERSHEY_PLAIN,
-                        5, (255, 0, 0), 5)
+                        5, macaron_text, 5)
+            
+            # 在右上角显示指尖的Z坐标
+            h, w, c = img.shape
+            finger_names = ["Thumb", "Index", "Middle", "Ring", "Pinky"]
+            font_face = cv2.FONT_HERSHEY_PLAIN
+            font_scale = 1.2
+            font_thickness = 1
+            text_color = (255, 255, 255)  # 白色
+            bg_color = (0, 0, 0)          # 黑色
+
+            y_pos = 20  # y轴起始位置
+            for i, tip_id in enumerate(detector.tipIds):
+                if len(lmList) > tip_id:
+                    z_val = lmList[tip_id][3]
+                    text = f"{finger_names[i]}: {z_val:.2f}"
+                    
+                    (text_w, text_h), baseline = cv2.getTextSize(text, font_face, font_scale, font_thickness)
+                    
+                    # 绘制背景
+                    cv2.rectangle(img, (w - text_w - 25, y_pos), (w - 10, y_pos + text_h + baseline), bg_color, cv2.FILLED)
+                    # 绘制文字
+                    cv2.putText(img, text, (w - text_w - 20, y_pos + text_h), font_face, font_scale, text_color, font_thickness)
+                    
+                    y_pos += text_h + baseline + 10 # 移动到下一行
 
         # 计算并显示FPS
         cTime = time.time()
         fps = 1 / (cTime - pTime)
         pTime = cTime
         cv2.putText(img, f'FPS: {int(fps)}', (10, 160), cv2.FONT_HERSHEY_PLAIN, 2, 
-                    (255, 0, 255), 2)
+                    macaron_info, 2)
 
         # 显示图像
         cv2.imshow("3D Hand Tracking", img)
