@@ -16,7 +16,26 @@
 
 ---
 
-## 🚀 工作原理深度解析
+## 🔧 Quick Start
+
+1.  **环境配置**:
+    确保已安装 Python 3.x。然后通过 pip 安装必要的库。项目根目录下已包含 `requirements.txt` 文件。
+    ```bash
+    pip install -r requirements.txt
+    ```
+    它会自动安装 `opencv-python`,`pygame` 和 `mediapipe`。
+
+2.  **启动程序**:
+    在项目根目录下运行以下命令：
+    ```bash
+    python hand_tracking_3d.py
+    ```
+
+3.  **退出程序**:
+    在程序窗口激活的状态下，按 `q` 键即可退出。
+
+## 🚀 工作原理
+
 
 ### 1. 手部追踪 (Hand Tracking)
 
@@ -88,7 +107,7 @@ MediaPipe Hands 采用了一个巧妙的两阶段检测流程：
 
 #### **标定方法 (Calibration)**
 
-为了让估算更准确，代码中内置了一组标定参数（`D_REF_CM` 和 `PIX_DIST_REF`）。您可以按照代码注释中的步骤进行一次性标定，以适配您的摄像头和使用场景，从而获得更精确的距离读数。
+为了让估算更准确，代码中内置了一组标定参数（`D_REF_CM` 和 `PIX_DIST_REF`）。可以按照代码注释中的步骤进行一次性标定，以适配摄像头和使用场景，从而获得更精确的距离读数。
 
 ### 4. 补充功能 (My Additions)
 
@@ -101,20 +120,4 @@ MediaPipe Hands 采用了一个巧妙的两阶段检测流程：
 
 ---
 
-## 🔧 如何运行
 
-1.  **环境配置**:
-    确保您已安装 Python 3.x。然后通过 pip 安装必要的库。项目根目录下已包含 `requirements.txt` 文件。
-    ```bash
-    pip install -r requirements.txt
-    ```
-    它会自动安装 `opencv-python` 和 `mediapipe`。
-
-2.  **启动程序**:
-    在项目根目录下运行以下命令：
-    ```bash
-    python hand_tracking_3d.py
-    ```
-
-3.  **退出程序**:
-    在程序窗口激活的状态下，按 `q` 键即可退出。
