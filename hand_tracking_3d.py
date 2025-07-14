@@ -1,6 +1,7 @@
 import cv2
 import mediapipe as mp
 import time
+import math
 
 class HandDetector():
     """
@@ -126,6 +127,15 @@ def main():
     macaron_text = (255, 204, 204) # 文字: 淡蓝
     macaron_info = (221, 160, 221) # 信息: 淡紫
 
+    # --- 距离估算标定参数 ---
+    # 说明: 这是一个简化的标定过程。您需要亲自测量一次来获得更准的结果。
+    # 步骤:
+    # 1. 拿一把尺子，将您的手放在离摄像头固定距离的地方(例如30厘米)。
+    # 2. 运行程序，在下面的代码中打印出 `pixel_dist` 的值。
+    # 3. 将测量的距离(厘米)和打印出的像素距离填入下面的值。
+    D_REF_CM = 30.0      # 参考真实距离 (厘米)
+    PIX_DIST_REF = 200.0 # 在参考距离下，测得的手腕到中指根部的像素距离
+
     while True:
         success, img = cap.read()
         if not success:
@@ -144,37 +154,39 @@ def main():
             fingers = detector.fingersUp()
             totalFingers = fingers.count(1)
             
-            # 打印Z坐标以供观察
-            # print(f"Wrist Z: {lmList[0][3]:.2f}, Index Tip Z: {lmList[8][3]:.2f}")
-
             # 4. 在屏幕上显示结果
             cv2.rectangle(img, (20, 20), (120, 120), macaron_bg, cv2.FILLED)
             cv2.putText(img, str(totalFingers), (45, 100), cv2.FONT_HERSHEY_PLAIN,
                         5, macaron_text, 5)
             
-            # 在右上角显示指尖的Z坐标
-            h, w, c = img.shape
-            finger_names = ["Thumb", "Index", "Middle", "Ring", "Pinky"]
-            font_face = cv2.FONT_HERSHEY_PLAIN
-            font_scale = 1.2
-            font_thickness = 1
-            text_color = (255, 255, 255)  # 白色
-            bg_color = (0, 0, 0)          # 黑色
+            # 5. 计算并显示估算的距离
+            # 我们使用手腕(0)和中指根部(9)的距离来估算
+            x1, y1 = lmList[0][1], lmList[0][2]
+            x2, y2 = lmList[9][1], lmList[9][2]
+            pixel_dist = math.hypot(x2 - x1, y2 - y1)
 
-            y_pos = 20  # y轴起始位置
-            for i, tip_id in enumerate(detector.tipIds):
-                if len(lmList) > tip_id:
-                    z_val = lmList[tip_id][3]
-                    text = f"{finger_names[i]}: {z_val:.2f}"
-                    
-                    (text_w, text_h), baseline = cv2.getTextSize(text, font_face, font_scale, font_thickness)
-                    
-                    # 绘制背景
-                    cv2.rectangle(img, (w - text_w - 25, y_pos), (w - 10, y_pos + text_h + baseline), bg_color, cv2.FILLED)
-                    # 绘制文字
-                    cv2.putText(img, text, (w - text_w - 20, y_pos + text_h), font_face, font_scale, text_color, font_thickness)
-                    
-                    y_pos += text_h + baseline + 10 # 移动到下一行
+            # # 用于标定：取消下面的注释来打印像素距离
+            # print(pixel_dist)
+
+            if pixel_dist > 0:
+                dist_cm = (PIX_DIST_REF * D_REF_CM) / pixel_dist
+                
+                h, w, c = img.shape
+                # 准备显示文本
+                text = f"Dist: {dist_cm:.1f} cm"
+                font_face = cv2.FONT_HERSHEY_PLAIN
+                font_scale = 1.8
+                font_thickness = 2
+                text_color = (255, 255, 255)  # 白色
+                bg_color = (0, 0, 0)          # 黑色
+
+                (text_w, text_h), baseline = cv2.getTextSize(text, font_face, font_scale, font_thickness)
+                
+                # 绘制背景
+                cv2.rectangle(img, (w - text_w - 30, 20), (w - 10, 20 + text_h + baseline + 10), bg_color, cv2.FILLED)
+                # 绘制文字
+                cv2.putText(img, text, (w - text_w - 20, 20 + text_h + 5), font_face, font_scale, text_color, font_thickness)
+
 
         # 计算并显示FPS
         cTime = time.time()
@@ -193,4 +205,4 @@ def main():
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    main() 
+    main()
