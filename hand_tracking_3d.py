@@ -185,7 +185,8 @@ def main():
     C_BACKGROUND = (3, 10, 19)
     C_PANEL = (9, 21, 38)
     C_ACCENT = (110, 169, 255)   # 骨架线条颜色 (#6EA9FF)
-    C_JOINT = (248, 63, 23)       # 关节点颜色 (#F83F17)
+    C_JOINT_TIP = (248, 63, 23)   # 指尖关节点颜色 (#F83F17)
+    C_JOINT_OTHER = (255, 188, 31) # 其他关节点颜色
     C_TEXT = (210, 220, 230)
     C_TEXT_DIM = (100, 110, 120)
     C_BTN_EXIT = (19, 31, 48)
@@ -254,9 +255,16 @@ def main():
                 p2 = lmList[conn[1]]
                 draw_glowing_line(glow_surface, C_ACCENT, (p1[1], p1[2]), (p2[1], p2[2]), 2)
                 
-            # 绘制关节点 (后画，覆盖在线条上)
+            # 绘制关节点 (后画，并区分指尖)
             for point in lmList:
-                draw_glowing_circle(glow_surface, C_JOINT, (point[1], point[2]), 6, core_alpha=190)
+                joint_id = point[0]
+                center_pos = (point[1], point[2])
+                if joint_id in detector.tipIds:
+                    # 指尖: 大、高亮
+                    draw_glowing_circle(glow_surface, C_JOINT_TIP, center_pos, 6, core_alpha=190)
+                else:
+                    # 其他关节: 小、次要颜色
+                    draw_glowing_circle(glow_surface, C_JOINT_OTHER, center_pos, 3, core_alpha=220)
 
 
             # --- 功能计算 ---
