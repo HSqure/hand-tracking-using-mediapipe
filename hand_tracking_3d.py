@@ -186,7 +186,7 @@ def main():
     C_PANEL = (9, 21, 38)
     C_ACCENT = (110, 169, 255)   # 骨架线条颜色 (#6EA9FF)
     C_JOINT_TIP = (248, 63, 23)   # 指尖关节点颜色 (#F83F17)
-    C_JOINT_OTHER = (255, 188, 31) # 其他关节点颜色
+    C_JOINT_OTHER = (147, 31, 255) # 其他关节点颜色
     C_TEXT = (210, 220, 230)
     C_TEXT_DIM = (100, 110, 120)
     C_BTN_EXIT = (19, 31, 48)
